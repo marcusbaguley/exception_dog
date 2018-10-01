@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["marcus.baguley@gmail.com"]
 
   spec.summary       = %q{Wrapper for sending exceptions to datadog as events}
-  spec.description   = %q{Experiment to see if datadog can be used as an exception store}
+  spec.description   = %q{Wrapper for sending exceptions to datadog as events}
   spec.homepage      = "https://github.com/marcusbaguley/exception_dog"
   spec.license       = "MIT"
 

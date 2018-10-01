@@ -1,6 +1,8 @@
+require "rubygems"
+
 require "exception_dog/version"
-require "exception_dog/handler"
 require "exception_dog/event"
+require "exception_dog/handler"
 
 module ExceptionDog
   class Configuration
@@ -12,12 +14,15 @@ module ExceptionDog
     attr_accessor :logger
     attr_accessor :service_name
     attr_accessor :tags
+    attr_accessor :test_mode
 
     def initialize
       self.source_type_name = 'my_apps'
       self.alert_type = 'error'
       self.environment = 'prod'
+      self.test_mode = false
       self.tags = []
+      self.logger = Logger.new(STDOUT)
     end
 
     def errors
@@ -41,6 +46,9 @@ module ExceptionDog
 
     def configure
       yield configuration
+      configuration.logger ||= Logger.new(STDOUT)
+      configuration.logger.error "Invalid ExceptionDog config #{configuration.errors.inspect}" unless configuration.valid?
+      configuration
     end
 
     def notify(exception)

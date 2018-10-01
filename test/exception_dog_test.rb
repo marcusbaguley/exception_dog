@@ -23,6 +23,7 @@ describe ExceptionDog do
       ExceptionDog.configure do |config|
         config.api_key = api_key
         config.service_name = 'mini_test_specs'
+        config.logger = Logger.new(nil)
       end
     end
 
@@ -40,12 +41,12 @@ describe ExceptionDog do
 
     describe 'with a mocked request' do
       before do
-        stub_request(:post, "http://api.datadoghq.com:443/api/v1/events?api_key=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        stub_request(:post, "https://api.datadoghq.com/api/v1/events?api_key=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
       end
 
       it 'notifies with an exception' do
         ExceptionDog.notify(exception)
-        assert_requested :post, "http://api.datadoghq.com:443/api/v1/events?api_key=#{api_key}", body: {"title":"Hello","text":"StandardError\nHello\nline1","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1","priority":"normal","source_type_name":"my_apps","alert_type":"error"}.to_json
+        assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}", body: {"title":"Hello","text":"StandardError\nHello\nline1","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1","priority":"normal","source_type_name":"my_apps","alert_type":"error"}.to_json
       end
 
       describe ' using middleware' do
@@ -67,7 +68,7 @@ describe ExceptionDog do
           rescue
             assert true
           end
-          assert_requested :post, "http://api.datadoghq.com:443/api/v1/events?api_key=#{api_key}"
+          assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
         end
 
         it 'does not notify or raise exception in middleware' do
@@ -79,7 +80,7 @@ describe ExceptionDog do
           rescue
             assert false
           end
-          assert_not_requested :post, "http://api.datadoghq.com:443/api/v1/events?api_key=#{api_key}"
+          assert_not_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
         end
 
         it 'notifies from a rack exception and does not raise' do
@@ -92,7 +93,7 @@ describe ExceptionDog do
           rescue
             assert false
           end
-          assert_requested :post, "http://api.datadoghq.com:443/api/v1/events?api_key=#{api_key}"
+          assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
         end
       end
     end

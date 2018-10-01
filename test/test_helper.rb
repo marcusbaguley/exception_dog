@@ -5,4 +5,4 @@ require "minitest/autorun"
 require "minitest/spec"
 require "minitest/mock"
 require 'webmock/minitest'
-include WebMock
+include WebMock::API
