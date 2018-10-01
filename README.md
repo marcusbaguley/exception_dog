@@ -22,7 +22,7 @@ Initialise exception_dog in a `config/initializers/exception_dog.rb`
 ## Running tests
 
 ```
-ruby -Ilib test/*.rb
+ruby -Ilib -Itest test/*.rb
 ```
 ## License
 
