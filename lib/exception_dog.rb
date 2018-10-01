@@ -1,8 +1,8 @@
 require "rubygems"
 
 require "exception_dog/version"
-require "exception_dog/handler"
 require "exception_dog/event"
+require "exception_dog/handler"
 
 module ExceptionDog
   class Configuration
