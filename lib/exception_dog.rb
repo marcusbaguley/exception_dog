@@ -1,3 +1,5 @@
+require "rubygems"
+
 require "exception_dog/version"
 require "exception_dog/handler"
 require "exception_dog/event"
