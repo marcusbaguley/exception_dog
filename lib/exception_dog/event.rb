@@ -34,9 +34,15 @@ module ExceptionDog
       request.body = body.to_json
       # Send the request
       logger.info "ExceptionDog::Sending error event to datadog"
-      response = http.request(request)
-      logger.debug response.body if response.respond_to?(:body)
-      logger.debug "ExceptionDog:Response: #{response.inspect}"
+      begin
+        response = http.request(request)
+        logger.debug response.body if response.respond_to?(:body)
+        logger.debug "ExceptionDog:Response: #{response.inspect}"
+      rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+               Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
+        logger.error("ExceptionDog::Failed to send to datadog")
+        logger.error(e)
+      end
     end
   end
 end
