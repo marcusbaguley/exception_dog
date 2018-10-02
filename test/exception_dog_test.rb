@@ -129,7 +129,7 @@ describe ExceptionDog do
 
     describe 'with a mocked request' do
       it 'notifies with an exception' do
-        assert_send([ExceptionDog::Event, :send_to_agent, ExceptionDog.configuration.logger, 'localhost', 8125, exception_hash])
+        assert_send([ExceptionDog::Event, :send_to_agent, ExceptionDog.configuration, exception_hash])
         ExceptionDog.notify(exception)
       end
     end

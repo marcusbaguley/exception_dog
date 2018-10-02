@@ -13,25 +13,26 @@ module ExceptionDog
       end
       body = args
       if configuration.use_agent
-        send_to_agent(configuration.logger, configuration.agent_host, configuration.agent_port, body)
+        send_to_agent(configuration, args)
       else
-        uri = URI.parse("https://api.datadoghq.com/api/v1/events?api_key=#{configuration.api_key}")
-        send_to_api(configuration.logger, uri, body)
+        send_to_api(configuration, args)
       end
     end
 
-    def self.send_to_agent(logger, host, port, event)
-      @@socket = Datadog::Statsd.new(host, port)
-      @@socket.event(event[:title], event[:text], event)
+    def self.send_to_agent(configuration, args)
+      @@socket = Datadog::Statsd.new(configuration.agent_host, configuration.agent_port)
+      @@socket.event(args[:title], args[:text], args)
     end
 
-    def self.send_to_api(logger, uri, body)
+    def self.send_to_api(configuration, args)
+      uri = URI.parse("https://api.datadoghq.com/api/v1/events?api_key=#{configuration.api_key}")
+      logger = configuration.logger
       header = {'Content-Type': 'application/json'}
       # Create the HTTP objects
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       request = Net::HTTP::Post.new(uri.request_uri, header)
-      request.body = body.to_json
+      request.body = args.to_json
       # Send the request
       logger.info "ExceptionDog::Sending error event to datadog"
       begin
