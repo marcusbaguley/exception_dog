@@ -6,15 +6,14 @@ module ExceptionDog
       if !configuration.valid? || configuration.test_mode
         fallback_logger(exception: exception, configuration: configuration, request_data: request_data, priority: priority)
       else
-        Event.post(api_key: configuration.api_key,
-                   logger: configuration.logger,
-                   title: exception.message,
-                   text: exception_text(exception, request_data),
-                   priority: priority,
-                   tags: ["environment:#{configuration.environment}", "service:#{configuration.service_name}"] + configuration.tags,
-                   aggregation_key: aggregation_key(exception),
-                   source_type_name: configuration.source_type_name,
-                   alert_type: 'error')
+        Event.notify(configuration: configuration,
+                     title: exception.message,
+                     text: exception_text(exception, request_data),
+                     priority: priority,
+                     tags: ["environment:#{configuration.environment}", "service:#{configuration.service_name}"] + configuration.tags,
+                     aggregation_key: aggregation_key(exception),
+                     source_type_name: configuration.source_type_name,
+                     alert_type: 'error')
       end
     end
 

@@ -14,15 +14,20 @@ describe ExceptionDog do
     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   end
 
+  def exception_hash
+    {"title":"Hello","text":"StandardError\nHello\nline1","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1","priority":"normal","source_type_name":"my_apps","alert_type":"error"}
+  end
+
   it 'has a version number' do
     refute_nil ::ExceptionDog::VERSION
   end
 
-  describe 'with a valid configuration' do
+  describe 'with a api configuration' do
     before do
       ExceptionDog.configure do |config|
         config.api_key = api_key
         config.service_name = 'mini_test_specs'
+        config.use_agent = false
         config.logger = Logger.new(nil)
       end
     end
@@ -46,7 +51,7 @@ describe ExceptionDog do
 
       it 'notifies with an exception' do
         ExceptionDog.notify(exception)
-        assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}", body: {"title":"Hello","text":"StandardError\nHello\nline1","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1","priority":"normal","source_type_name":"my_apps","alert_type":"error"}.to_json
+        assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}", body: exception_hash.to_json
       end
 
       describe ' using middleware' do
@@ -90,11 +95,42 @@ describe ExceptionDog do
             env = {"rack.exception" => exception}
             middleware.call(env)
             assert true
-          rescue
+          rescue => e
+            puts e.inspect
             assert false
           end
           assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
         end
+      end
+    end
+  end
+  describe 'with an agent configuration' do
+    before do
+      ExceptionDog.configure do |config|
+        config.service_name = 'mini_test_specs'
+        config.use_agent = true
+        config.logger = Logger.new(STDOUT)
+      end
+    end
+
+    it 'configures the agent' do
+      config = ExceptionDog.configuration
+      assert_equal config.agent_host, 'localhost'
+      assert_equal config.agent_port, 8125
+    end
+
+    it 'configures the service_name' do
+      assert_equal ExceptionDog.configuration.service_name, 'mini_test_specs'
+    end
+
+    it 'is valid' do
+      assert ExceptionDog.configuration.valid?
+    end
+
+    describe 'with a mocked request' do
+      it 'notifies with an exception' do
+        assert_send([ExceptionDog::Event, :send_to_agent, ExceptionDog.configuration.logger, 'localhost', 8125, exception_hash])
+        ExceptionDog.notify(exception)
       end
     end
   end

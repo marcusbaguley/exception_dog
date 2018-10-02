@@ -15,19 +15,25 @@ module ExceptionDog
     attr_accessor :service_name
     attr_accessor :tags
     attr_accessor :test_mode
+    attr_accessor :agent_host
+    attr_accessor :agent_port
+    attr_accessor :use_agent
 
     def initialize
       self.source_type_name = 'my_apps'
       self.alert_type = 'error'
       self.environment = 'prod'
       self.test_mode = false
+      self.use_agent = false
+      self.agent_host = 'localhost'
+      self.agent_port = 8125
       self.tags = []
       self.logger = Logger.new(STDOUT)
     end
 
     def errors
       @errors = []
-      @errors << "Invalid API Key" unless api_key && api_key =~ /[0-9a-f]{32}/i
+      @errors << "Invalid API Key" unless use_agent || api_key && api_key =~ /[0-9a-f]{32}/i
       @errors << "No service_name supplied" unless service_name
       @errors
     end
