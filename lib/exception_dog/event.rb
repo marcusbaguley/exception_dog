@@ -11,7 +11,6 @@ module ExceptionDog
       method(__method__).parameters.map do |_, name|
         args[name] = binding.local_variable_get(name) unless [:configuration].include?(name)
       end
-      body = args
       if configuration.use_agent
         send_to_agent(configuration, args)
       else
@@ -28,12 +27,10 @@ module ExceptionDog
       uri = URI.parse("https://api.datadoghq.com/api/v1/events?api_key=#{configuration.api_key}")
       logger = configuration.logger
       header = {'Content-Type': 'application/json'}
-      # Create the HTTP objects
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       request = Net::HTTP::Post.new(uri.request_uri, header)
       request.body = args.to_json
-      # Send the request
       logger.info "ExceptionDog::Sending error event to datadog"
       begin
         response = http.request(request)
