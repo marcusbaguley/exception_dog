@@ -5,7 +5,7 @@ module ExceptionDog::Integrations
     end
 
     def call(env)
-      ExceptionDog.configuration.set_request_data(:rack_env, env)
+      ExceptionDog.configuration.set_request_data(:rack_request, env)
       begin
         response = @app.call(env)
       rescue Exception => raised

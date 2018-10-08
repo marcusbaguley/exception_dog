@@ -15,7 +15,7 @@ describe ExceptionDog do
   end
 
   def exception_hash
-    {"title":"Hello","text":"StandardError\nHello\nline1","priority":"normal","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1","source_type_name":"my_apps","alert_type":"error"}
+    {"title":"Hello","text":"StandardError\nHello\nline1","priority":"normal","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1".hash.to_s,"source_type_name":"my_apps","alert_type":"error"}
   end
 
   it 'has a version number' do
@@ -70,8 +70,8 @@ describe ExceptionDog do
           begin
             middleware.call({})
             assert false
-          rescue
-            assert true
+          rescue => e
+            assert_equal e.class, StandardError
           end
           assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
         end

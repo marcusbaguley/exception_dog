@@ -23,7 +23,7 @@ ExceptionDog.configure do |config|
   config.agent_host = 'localhost'
   config.agent_port = 8125
   config.logger = Rails.logger
-  config.service_name = Rails.application.class.name.underscore
+  config.service_name = Rails.application.class.parent.name.underscore
 end
 ```
 
@@ -35,7 +35,7 @@ ExceptionDog.configure do |config|
   config.api_key = ENV["DATA_DOG_API_KEY"]
   config.notifier = Rails.env.test? ? "ExceptionDog::LogNotifier" : "ExceptionDog::HttpNotifier"
   config.logger = Rails.logger
-  config.service_name = Rails.application.class.name.underscore
+  config.service_name = Rails.application.class.parent.name.underscore
 end
 ```
 
@@ -43,7 +43,8 @@ Middleware Configuration
 You can set up a simple middleware to catch and report exceptions for Rack based apps.
 
 ```
-Rails.application.config.middleware.insert_before Rack::Request, ExceptionDog::Integration::RackMiddleware
+require 'exception_dog/integrations/rack'
+Rails.application.config.middleware.insert_after ActionDispatch::ShowExceptions, ExceptionDog::Integrations::Rack
 ```
 
 ## Running tests
