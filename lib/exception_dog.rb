@@ -8,8 +8,6 @@ require "exception_dog/handler"
 
 module ExceptionDog
   class Configuration
-    THREAD_LOCAL_NAME = "exception_dog_request"
-
     attr_accessor :api_key
     attr_accessor :app_name
     attr_accessor :source_type_name
@@ -45,18 +43,6 @@ module ExceptionDog
     def valid?
       errors.empty?
     end
-
-    def request_data
-      Thread.current[THREAD_LOCAL_NAME] ||= {}
-    end
-
-    def set_request_data(key, value)
-      self.request_data[key] = value
-    end
-
-    def clear_request_data
-      Thread.current[THREAD_LOCAL_NAME] = nil
-    end
   end
 
   class << self
@@ -77,8 +63,8 @@ module ExceptionDog
       @configuration
     end
 
-    def notify(exception)
-      @handler.notify(exception)
+    def notify(exception, opts = {})
+      @handler.notify(exception, opts)
     end
 
     def default_hostname

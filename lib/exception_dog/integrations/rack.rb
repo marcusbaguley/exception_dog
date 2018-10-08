@@ -5,17 +5,17 @@ module ExceptionDog::Integrations
     end
 
     def call(env)
-      ExceptionDog.configuration.set_request_data(:rack_request, env)
       begin
         response = @app.call(env)
       rescue Exception => raised
-        ExceptionDog.notify(raised)
+        data = {
+          request_uri: env["REQUEST_URI"],
+          remote_ip: env["HTTP_X_FORWARDED_FOR"] || env["HTTP_FORWARDED_FOR"]
+        }
+        ExceptionDog.notify(raised, data)
         raise raised
       end
-      ExceptionDog.notify(env["rack.exception"]) if env["rack.exception"]
       response
-    ensure
-      ExceptionDog.configuration.clear_request_data
     end
   end
 end

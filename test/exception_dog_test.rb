@@ -71,7 +71,7 @@ describe ExceptionDog do
             middleware.call({})
             assert false
           rescue => e
-            assert_equal e.class, StandardError
+            assert_equal e.class, StandardError, e
           end
           assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
         end
@@ -87,22 +87,10 @@ describe ExceptionDog do
           end
           assert_not_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
         end
-
-        it 'notifies from a rack exception and does not raise' do
-          app =  MyExceptionRaisingMiddleware.new({})
-          middleware = ExceptionDog::Integrations::Rack.new(app)
-          begin
-            env = {"rack.exception" => exception}
-            middleware.call(env)
-            assert true
-          rescue => e
-            assert false
-          end
-          assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
-        end
       end
     end
   end
+
   describe 'with an agent configuration' do
     before do
       ExceptionDog.configure do |config|
