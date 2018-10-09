@@ -29,8 +29,8 @@ module ExceptionDog
 
     def exception_text(exception, data)
       detail = [exception.class.name[0..MAX_LINE_LENGTH], exception.message[0..MAX_LINE_LENGTH]]
-      data.keys.each do |key|
-        detail << "#{key}: #{data[key].inspect[0..MAX_LINE_LENGTH]}"
+      data.each do |key, val|
+        detail << "#{key}: #{val && val.to_s[0..MAX_LINE_LENGTH]}"
       end
       (detail + (exception.backtrace || []))[0..BACKTRACE_LINES].compact.join("\n")
     end
