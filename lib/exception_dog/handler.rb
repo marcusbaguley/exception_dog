@@ -15,7 +15,7 @@ module ExceptionDog
 
 
     def notify(exception, data)
-      attach_dd_trace_id(data)
+      attach_dd_trace_id(data) if self.class.dd_trace_enabled
       title = exception.message[0..MAX_TITLE_LENGTH]
       text = exception_text(exception, data)[0..MAX_TEXT_LEGNTH]
       opts = {}
@@ -40,11 +40,16 @@ module ExceptionDog
     end
 
     def attach_dd_trace_id(data)
-      enabled = Object.const_get('Datadog::Context') rescue nil
-      if enabled
-        context = Thread.current[:datadog_context]
-        data[:trace_id] = context&.trace_id
-      end
+      data[:trace_id] = self.class.current_trace_id
+    end
+
+    def self.current_trace_id
+      context = Thread.current[:datadog_context]
+      context&.trace_id
+    end
+
+    def self.dd_trace_enabled
+      @dd_trace_enabled ||= Object.const_get('Datadog::Context') rescue false
     end
   end
 end
