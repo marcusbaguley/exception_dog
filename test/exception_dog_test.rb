@@ -15,7 +15,7 @@ describe ExceptionDog do
   end
 
   def exception_hash
-    {"title":"Hello","text":"StandardError\nHello\nline1","priority":"normal","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1".hash.to_s,"source_type_name":"my_apps","alert_type":"error"}
+    {"title":"Hello","text":"StandardError\nHello\ntrace_id: nil\nline1","priority":"normal","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1".hash.to_s,"source_type_name":"my_apps","alert_type":"error"}
   end
 
   it 'has a version number' do
@@ -33,11 +33,11 @@ describe ExceptionDog do
     end
 
     it 'configures the api_key' do
-      assert_equal ExceptionDog.configuration.api_key, api_key
+      assert_equal api_key, ExceptionDog.configuration.api_key
     end
 
     it 'configures the service_name' do
-      assert_equal ExceptionDog.configuration.service_name, 'mini_test_specs'
+      assert_equal 'mini_test_specs', ExceptionDog.configuration.service_name
     end
 
     it 'is valid' do
@@ -71,7 +71,7 @@ describe ExceptionDog do
             middleware.call({})
             assert false
           rescue => e
-            assert_equal e.class, StandardError, e
+            assert_equal StandardError, e.class, e
           end
           assert_requested :post, "https://api.datadoghq.com/api/v1/events?api_key=#{api_key}"
         end
@@ -102,21 +102,61 @@ describe ExceptionDog do
 
     it 'configures the agent' do
       config = ExceptionDog.configuration
-      assert_equal config.agent_host, 'localhost'
-      assert_equal config.agent_port, 8125
+      assert_equal 'localhost', config.agent_host
+      assert_equal 8125, config.agent_port
     end
 
     it 'configures the service_name' do
-      assert_equal ExceptionDog.configuration.service_name, 'mini_test_specs'
+      assert_equal 'mini_test_specs', ExceptionDog.configuration.service_name
     end
 
     it 'is valid' do
-      assert_equal ExceptionDog.configuration.errors, []
-      assert_equal ExceptionDog.configuration.valid?, true
+      assert_equal [], ExceptionDog.configuration.errors
+      assert_equal true, ExceptionDog.configuration.valid?
     end
 
     it 'does not raise' do
       ExceptionDog.notify(exception)
     end
+  end
+
+  describe 'with a test log configuration' do
+    before do
+      ExceptionDog.configure do |config|
+        config.service_name = 'mini_test_specs'
+        config.notifier = "ExceptionDog::LogNotifier"
+        config.logger = Logger.new(nil)
+      end
+    end
+
+    it 'configures the agent' do
+      config = ExceptionDog.configuration
+    end
+
+    it 'is valid' do
+      assert_equal [], ExceptionDog.configuration.errors
+      assert_equal true, ExceptionDog.configuration.valid?
+    end
+
+    it 'does not raise' do
+      ExceptionDog.notify(exception)
+    end
+
+    describe 'with Datadog::Context' do
+      before do
+        Thread.current[:datadog_context] = Datadog::Context.new
+      end
+
+      after do
+        Thread.current[:datadog_context] = nil
+      end
+
+      it 'adds trace to exception details' do
+        ExceptionDog.notify(exception)
+        last = ExceptionDog::LogNotifier.last_log
+        assert_equal "StandardError\nHello\ntrace_id: 123\nline1", last[1]
+      end
+    end
+
   end
 end

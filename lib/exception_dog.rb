@@ -63,8 +63,8 @@ module ExceptionDog
       @configuration
     end
 
-    def notify(exception, opts = {})
-      @handler.notify(exception, opts)
+    def notify(exception, data = {})
+      @handler.notify(exception, data)
     end
 
     def default_hostname

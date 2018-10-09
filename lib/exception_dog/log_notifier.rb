@@ -8,17 +8,19 @@ module ExceptionDog
 
     attr_reader :configuration
     attr_reader :logger
-    attr_reader :messages
 
     def initialize(configuration)
       @configuration = configuration
       @logger = configuration.logger
-      @messages = []
     end
 
     def notify(title, text, opts)
       logger.info "#{title}, #{text}, #{opts}"
-      @messages << [title, text, opts]
+      @@last_log = [title, text, opts]
+    end
+
+    def self.last_log
+      @@last_log
     end
 
     def errors
