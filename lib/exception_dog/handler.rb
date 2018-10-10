@@ -41,7 +41,7 @@ module ExceptionDog
     end
 
     def attach_dd_trace_id(data)
-      data[:trace_id] = self.class.current_trace_id
+      data[:trace_id] = "[Trace](https://app.datadoghq.com/apm/trace/#{self.class.current_trace_id})" if self.class.current_trace_id
     end
 
     def ignored(exception)
