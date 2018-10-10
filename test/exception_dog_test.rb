@@ -15,7 +15,7 @@ describe ExceptionDog do
   end
 
   def exception_hash
-    {"title":"Hello","text":"StandardError\nHello\ntrace_id: \nline1","priority":"normal","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1".hash.to_s,"source_type_name":"my_apps","alert_type":"error"}
+    {"title":"Hello","text":"StandardError\nHello\ntrace_id: \n`line1`\n","priority":"normal","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1".hash.to_s,"source_type_name":"my_apps","alert_type":"error"}
   end
 
   it 'has a version number' do
@@ -154,7 +154,39 @@ describe ExceptionDog do
       it 'adds trace to exception details' do
         ExceptionDog.notify(exception)
         last = ExceptionDog::LogNotifier.last_log
-        assert_equal "StandardError\nHello\ntrace_id: 123\nline1", last[1]
+        assert_equal "StandardError\nHello\ntrace_id: 123\n`line1`\n", last[1]
+      end
+    end
+
+    describe 'with an ignore_exceptions' do
+      before do
+        ExceptionDog.configuration.ignore_exceptions = ['StandardError']
+        ExceptionDog::LogNotifier.clear_log
+      end
+
+      after do
+        ExceptionDog.configuration.ignore_exceptions = []
+      end
+
+      it 'adds trace to exception details' do
+        ExceptionDog.notify(exception)
+        assert_nil ExceptionDog::LogNotifier.last_log
+      end
+    end
+
+    describe 'with an un-ignore_exceptions' do
+      before do
+        ExceptionDog.configuration.ignore_exceptions = ['RuntimeError']
+        ExceptionDog::LogNotifier.clear_log
+      end
+
+      after do
+        ExceptionDog.configuration.ignore_exceptions = []
+      end
+
+      it 'adds trace to exception details' do
+        ExceptionDog.notify(exception)
+        assert ExceptionDog::LogNotifier.last_log
       end
     end
 

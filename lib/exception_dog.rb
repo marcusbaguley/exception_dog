@@ -21,6 +21,7 @@ module ExceptionDog
     attr_accessor :agent_port
     attr_accessor :notifier
     attr_accessor :notifier_instance
+    attr_accessor :ignore_exceptions
 
     def initialize
       self.source_type_name = 'my_apps'
@@ -31,6 +32,7 @@ module ExceptionDog
       self.agent_port = 8125
       self.tags = []
       self.logger = Logger.new(STDOUT)
+      self.ignore_exceptions = []
     end
 
     def errors

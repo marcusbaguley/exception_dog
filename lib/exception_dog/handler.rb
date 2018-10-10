@@ -15,6 +15,7 @@ module ExceptionDog
 
 
     def notify(exception, data)
+      return if ignored(exception)
       attach_dd_trace_id(data) if self.class.dd_trace_enabled
       title = exception.message[0..MAX_TITLE_LENGTH]
       text = exception_text(exception, data)[0..MAX_TEXT_LEGNTH]
@@ -32,7 +33,7 @@ module ExceptionDog
       data.each do |key, val|
         detail << "#{key}: #{val && val.to_s[0..MAX_LINE_LENGTH]}"
       end
-      (detail + (exception.backtrace || []))[0..BACKTRACE_LINES].compact.join("\n")
+      (detail + format_backtrace(exception.backtrace)).compact.join("\n")
     end
 
     def aggregation_key(exception)
@@ -41,6 +42,18 @@ module ExceptionDog
 
     def attach_dd_trace_id(data)
       data[:trace_id] = self.class.current_trace_id
+    end
+
+    def ignored(exception)
+      configuration.ignore_exceptions&.include?(exception.class.name)
+    end
+
+    # remove backticks, single quotes, \n and ensure each line is reasonably small
+    def format_backtrace(backtrace)
+      backtrace ||= []
+      backtrace[0..BACKTRACE_LINES].collect do |line|
+        "`#{line.gsub(/\n|\`|\'/, '')}`\n"[0..MAX_LINE_LENGTH]
+      end
     end
 
     def self.current_trace_id

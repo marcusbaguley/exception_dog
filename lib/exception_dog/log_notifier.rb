@@ -23,6 +23,10 @@ module ExceptionDog
       @@last_log
     end
 
+    def self.clear_log
+      @@last_log = nil
+    end
+
     def errors
       []
     end

@@ -15,7 +15,7 @@ gem 'exception_dog'
 `exception_dog` can be configured to use the datadog agent or the public cloud API.
 You can configure in an initialiser, for example: in a file `config/initializers/exception_dog.rb`
 
-Agent Configuration Example
+Datadog Agent Configuration Example
 ```
 ExceptionDog.configure do |config|
   config.environment = ENV["RAILS_ENV"]
@@ -24,10 +24,11 @@ ExceptionDog.configure do |config|
   config.agent_port = 8125
   config.logger = Rails.logger
   config.service_name = Rails.application.class.parent.name.underscore
+  config.ignore_exceptions = ["ActionController::RoutingError"]
 end
 ```
 
-Cloud API configuration
+Datadog API configuration
 
 ```
 ExceptionDog.configure do |config|
@@ -36,6 +37,7 @@ ExceptionDog.configure do |config|
   config.notifier = Rails.env.test? ? "ExceptionDog::LogNotifier" : "ExceptionDog::HttpNotifier"
   config.logger = Rails.logger
   config.service_name = Rails.application.class.parent.name.underscore
+  config.ignore_exceptions = ["ActionController::RoutingError"]
 end
 ```
 
