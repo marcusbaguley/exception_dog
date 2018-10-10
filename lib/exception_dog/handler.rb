@@ -3,7 +3,7 @@ module ExceptionDog
     MAX_LINE_LENGTH = 80
     MAX_TITLE_LENGTH = 100
     MAX_TEXT_LEGNTH = 4000
-    BACKTRACE_LINES = 7
+    BACKTRACE_LINES = 2
     attr_reader :configuration
     attr_reader :logger
 
@@ -41,7 +41,7 @@ module ExceptionDog
     end
 
     def attach_dd_trace_id(data)
-      data[:trace_id] = "[Trace](https://app.datadoghq.com/apm/trace/#{self.class.current_trace_id})" if self.class.current_trace_id
+      data[:trace_id] = "https://app.datadoghq.com/apm/trace/#{self.class.current_trace_id}" if self.class.current_trace_id
     end
 
     def ignored(exception)
@@ -52,7 +52,7 @@ module ExceptionDog
     def format_backtrace(backtrace)
       backtrace ||= []
       backtrace[0..BACKTRACE_LINES].collect do |line|
-        "`#{line.gsub(/\n|\`|\'/, '')}`\n"[0..MAX_LINE_LENGTH]
+        "#{line.gsub(/\n|\`|\'/, '')}".split(//).last(MAX_LINE_LENGTH).join
       end
     end
 

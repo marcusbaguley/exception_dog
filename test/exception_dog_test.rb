@@ -15,7 +15,7 @@ describe ExceptionDog do
   end
 
   def exception_hash
-    {"title":"Hello","text":"StandardError\nHello\n`line1`\n","priority":"normal","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1".hash.to_s,"source_type_name":"my_apps","alert_type":"error"}
+    {"title":"Hello","text":"StandardError\nHello\nline1","priority":"normal","tags":["environment:prod","service:mini_test_specs"],"aggregation_key":"StandardError-Hello-line1".hash.to_s,"source_type_name":"my_apps","alert_type":"error"}
   end
 
   it 'has a version number' do
@@ -154,7 +154,7 @@ describe ExceptionDog do
       it 'adds trace to exception details' do
         ExceptionDog.notify(exception)
         last = ExceptionDog::LogNotifier.last_log
-        assert_equal "StandardError\nHello\ntrace_id: [Trace](https://app.datadoghq.com/apm/trace/123)\n`line1`\n", last[1]
+        assert_equal "StandardError\nHello\ntrace_id: https://app.datadoghq.com/apm/trace/123\nline1", last[1]
       end
     end
 
