@@ -15,7 +15,7 @@ GEM
     hashdiff (0.3.7)
     minitest (5.11.3)
     public_suffix (4.0.6)
-    rake (10.5.0)
+    rake (13.0.6)
     safe_yaml (1.0.4)
     webmock (3.4.2)
       addressable (>= 2.3.6)
@@ -29,7 +29,7 @@ DEPENDENCIES
   bundler (~> 1.16)
   exception_dog!
   minitest (~> 5.0)
-  rake (~> 10.0)
+  rake (~> 13.0)
   webmock
 
 BUNDLED WITH
